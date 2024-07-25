@@ -9,7 +9,7 @@ use crate::model::*;
 use crate::vocab::Facet;
 use crate::vocab::Namespace::*;
 use crate::vocab::OWL2Datatype;
-use crate::{ontology::set::SetOntology, vocab::OWL};
+use crate::vocab::OWL;
 
 use std::borrow::Cow;
 use std::collections::BTreeSet;
@@ -28,23 +28,22 @@ where
     build: &'a Build<A>,
     mapping: PrefixMapping,
     reader: NsReader<R>,
-    // buf: Vec<u8>,
 }
 
-pub fn read<R: BufRead>(
+pub fn read<A: ForIRI, O: MutableOntology<A> + Default, R: BufRead>(
     bufread: &mut R,
     _config: ParserConfiguration,
-) -> Result<(SetOntology<RcStr>, PrefixMapping), HornedError> {
+) -> Result<(O, PrefixMapping), HornedError> {
     let b = Build::new();
     read_with_build(bufread, &b)
 }
 
-pub fn read_with_build<A: ForIRI, R: BufRead>(
+pub fn read_with_build<A: ForIRI, O: MutableOntology<A> + Default, R: BufRead>(
     bufread: R,
     build: &Build<A>,
-) -> Result<(SetOntology<A>, PrefixMapping), HornedError> {
+) -> Result<(O, PrefixMapping), HornedError> {
     let reader: NsReader<R> = NsReader::from_reader(bufread);
-    let mut ont = SetOntology::new();
+    let mut ont: O = Default::default();
     let mapping = PrefixMapping::default();
     let mut buf = Vec::new();
 
@@ -52,7 +51,6 @@ pub fn read_with_build<A: ForIRI, R: BufRead>(
         reader,
         build,
         mapping,
-        // buf: Vec::new(),
     };
 
     loop {
@@ -1363,10 +1361,11 @@ pub mod test {
         ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
         PrefixMapping,
     ) {
-        let r = read(bufread, ParserConfiguration::default());
+        let b = Build::new();
+        let r = read_with_build(bufread, &b);
         assert!(r.is_ok(), "Expected ontology, got failure:{:?}", r.err());
         let (o, m) = r.ok().unwrap();
-        (o.into(), m)
+        (o, m)
     }
 
     #[test]

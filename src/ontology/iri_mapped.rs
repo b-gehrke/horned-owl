@@ -352,14 +352,17 @@ mod test {
         let mut v: Vec<_> = o.into_iter().collect();
         v.sort();
 
+        // The index contains a copy of a component for each IRI in a component
         assert_eq!(
             v,
             [
                 AnnotatedComponent::from(Component::DeclareClass(decl1)),
                 AnnotatedComponent::from(Component::DeclareClass(decl2)),
                 AnnotatedComponent::from(Component::DeclareClass(decl3)),
-                AnnotatedComponent::from(Component::DisjointClasses(disj1)),
-                AnnotatedComponent::from(Component::DisjointClasses(disj2)),
+                AnnotatedComponent::from(Component::DisjointClasses(disj1.clone())), // Once for #a
+                AnnotatedComponent::from(Component::DisjointClasses(disj1)),         // Once for #b
+                AnnotatedComponent::from(Component::DisjointClasses(disj2.clone())), // Once for #a
+                AnnotatedComponent::from(Component::DisjointClasses(disj2)),         // Once for #b
             ]
         );
     }
@@ -398,15 +401,18 @@ mod test {
         // Iteration order is not guaranteed
         let mut v: Vec<_> = o.iter().collect();
         v.sort();
-
+        
+        // The index contains a copy of a component for each IRI in a component
         assert_eq!(
             v,
             [
                 &AnnotatedComponent::from(Component::DeclareClass(decl1)),
                 &AnnotatedComponent::from(Component::DeclareClass(decl2)),
                 &AnnotatedComponent::from(Component::DeclareClass(decl3)),
-                &AnnotatedComponent::from(Component::DisjointClasses(disj1)),
-                &AnnotatedComponent::from(Component::DisjointClasses(disj2)),
+                &AnnotatedComponent::from(Component::DisjointClasses(disj1.clone())), // Once for #a
+                &AnnotatedComponent::from(Component::DisjointClasses(disj1)),         // Once for #b
+                &AnnotatedComponent::from(Component::DisjointClasses(disj2.clone())), // Once for #a
+                &AnnotatedComponent::from(Component::DisjointClasses(disj2)),         // Once for #b
             ]
         );
     }

@@ -213,11 +213,12 @@ impl<A: ForIRI, AA: ForIndex<A>> OntologyIndex<A, AA> for IRIMappedIndex<A, AA> 
     }
 
     fn index_remove(&mut self, cmp: &AnnotatedComponent<A>) -> bool {
-        if let Some(iri) = self.aa_to_iris(cmp).iter().next() {
-            self.mut_set_for_iri(&iri.clone()).remove(cmp)
-        } else {
-            false
+        let mut result = false;
+        for iri in self.aa_to_iris(cmp).iter() {
+            result |= self.mut_set_for_iri(&iri).remove(cmp)
         }
+
+        result
     }
 }
 
